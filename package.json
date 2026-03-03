@@ -6,19 +6,45 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint .",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check"
   },
   "dependencies": {
+    "@apollo/client": "^4.1.6",
+    "@apollo/server": "^5.4.0",
+    "@as-integrations/next": "^4.1.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@fontsource/inter": "^5.2.8",
+    "@mui/material": "^7.3.8",
+    "@reactflow/node-resizer": "^2.2.14",
+    "amqplib": "^0.10.9",
+    "dagre": "^0.8.5",
+    "framer-motion": "^12.23.12",
+    "graphql": "^16.13.0",
+    "graphql-type-json": "^0.3.2",
+    "graphql-yoga": "^5.18.0",
+    "html-to-image": "^1.11.13",
+    "material-ui-confirm": "^4.0.0",
+    "mongoose": "^9.2.3",
     "next": "16.1.6",
+    "next-auth": "^4.24.13",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-icons": "^5.5.0",
+    "react-hook-form": "^7.62.0",
+    "reactflow": "^11.11.4",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@types/dagre": "^0.7.54",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "prettier": "^3.6.2",
     "typescript": "^5"
   }
 }
