@@ -57,18 +57,28 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
       </head>
       <body>
-        <SessionProvider>
-          <ReactFlowProvider>
-            <ApolloProvider client={apolloClient}>
-              <AppThemeProvider>
-                <ToastProvider>
-                  <Navbar />
-                  {children}
-                </ToastProvider>
-              </AppThemeProvider>
-            </ApolloProvider>
-          </ReactFlowProvider>
-        </SessionProvider>
+        <div className="mobile-blocked-screen">
+          <div className="mobile-blocked-screen__card">
+            <p className="mobile-blocked-screen__title">Desktop Required</p>
+            <p className="mobile-blocked-screen__text">
+              This app is available only on desktop screens. Please open it on a laptop or desktop browser.
+            </p>
+          </div>
+        </div>
+        <div className="desktop-app">
+          <SessionProvider>
+            <ReactFlowProvider>
+              <ApolloProvider client={apolloClient}>
+                <AppThemeProvider>
+                  <ToastProvider>
+                    <Navbar />
+                    {children}
+                  </ToastProvider>
+                </AppThemeProvider>
+              </ApolloProvider>
+            </ReactFlowProvider>
+          </SessionProvider>
+        </div>
       </body>
     </html>
   );
