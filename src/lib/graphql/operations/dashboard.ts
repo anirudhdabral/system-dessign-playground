@@ -6,6 +6,7 @@ export const GET_PLAYGROUNDS = gql`
       id
       title
       description
+      isPublic
     }
   }
 `;

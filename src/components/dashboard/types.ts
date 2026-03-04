@@ -2,6 +2,7 @@ export interface Playground {
   id: string;
   title: string;
   description: string;
+  isPublic: boolean;
 }
 
 export interface GetPlaygroundsResponse {

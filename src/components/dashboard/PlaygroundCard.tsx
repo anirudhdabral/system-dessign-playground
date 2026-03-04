@@ -1,7 +1,9 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
+import { alpha } from "@mui/material/styles";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { MdArrowForward } from "react-icons/md";
@@ -96,24 +98,35 @@ export const PlaygroundCard = ({ playgrounds }: { playgrounds: Playground[] }) =
                   {playground.description}
                 </Typography>
 
-                <Button
-                  component={Link}
-                  href={`/playground/${playground.id}`}
-                  variant="text"
-                  size="small"
-                  endIcon={<MdArrowForward />}
-                  sx={{
-                    mt: "auto",
-                    alignSelf: "flex-start",
-                    px: 0,
-                    minWidth: "auto",
-                    fontWeight: 600,
-                    fontSize: "0.78rem",
-                    color: "primary.main",
-                  }}
-                >
-                  Open
-                </Button>
+                <Box display={"flex"} justifyContent={"space-between"} alignItems={"center"} mt="auto">
+                  <Chip
+                    size="small"
+                    label={playground.isPublic ? "Public" : "Private"}
+                    sx={{
+                      height: 22,
+                      fontSize: "0.7rem",
+                      fontWeight: 700,
+                      bgcolor: (t) =>
+                        playground.isPublic ? alpha(t.palette.success.main, 0.14) : alpha(t.palette.text.primary, 0.08),
+                      color: playground.isPublic ? "success.main" : "text.secondary",
+                      border: "1px solid",
+                      borderColor: (t) =>
+                        playground.isPublic ? alpha(t.palette.success.main, 0.28) : alpha(t.palette.text.primary, 0.12),
+                    }}
+                  />
+                  <Button
+                    variant="text"
+                    size="small"
+                    endIcon={<MdArrowForward />}
+                    sx={{
+                      fontWeight: 600,
+                      fontSize: "0.78rem",
+                      color: "primary.main",
+                    }}
+                  >
+                    Open
+                  </Button>
+                </Box>
               </Paper>
             </Link>
           </motion.div>
