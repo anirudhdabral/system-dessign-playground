@@ -51,7 +51,7 @@ const themeScript = `(function(){
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         {/* Must be first — executes synchronously before CSS is applied */}
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />

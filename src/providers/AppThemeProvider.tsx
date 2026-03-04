@@ -42,6 +42,11 @@ export default function AppThemeProvider({ children }: AppThemeProviderProps) {
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
   });
   const [tokens, setTokens] = useState<ThemeColorTokens>(fallbackThemeColorTokens);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -144,6 +149,12 @@ export default function AppThemeProvider({ children }: AppThemeProviderProps) {
     }),
     [mode],
   );
+
+  // Prevent server/client theme className divergence.
+  // The app renders once the client has resolved persisted theme mode.
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <ThemeModeContext.Provider value={value}>
