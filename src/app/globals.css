@@ -52,6 +52,12 @@
   --gray-700: #4a5568;
   --gray-800: #2d3748;
   --gray-900: #1a202c;
+
+  /* Transition timing */
+  --theme-transition:
+    background-color 300ms cubic-bezier(0.4, 0, 0.2, 1), color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 300ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1),
+    fill 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -121,18 +127,55 @@ body {
   overflow-x: hidden;
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Inter;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
+/* Global smooth theme transitions – applied to all elements */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+  /* transition on theme-sensitive props so every element fades smoothly */
+  transition:
+    background-color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+    color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 300ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1),
+    fill 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Exclude transitions on elements that need immediate or different transitions */
+a,
+button,
+input,
+select,
+textarea,
+[role="button"] {
+  transition:
+    background-color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    transform 180ms cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Suppress all transitions during theme switch to prevent visual glitches from double-firing */
+html.theme-switching *,
+html.theme-switching *::before,
+html.theme-switching *::after {
+  transition: none !important;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
@@ -140,8 +183,71 @@ a {
   text-decoration: none;
 }
 
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-400);
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
   }
+}
+
+/* ReactFlow overrides */
+.react-flow__attribution {
+  opacity: 0.4;
+}
+
+/* Ensure ReactFlow node position transforms are NEVER CSS-transitioned.
+   ReactFlow updates inline transform styles on every animation frame during
+   drag — any CSS transition here creates visible lag. */
+.react-flow__node {
+  transition:
+    box-shadow 160ms ease,
+    opacity 160ms ease !important;
+  will-change: transform;
+}
+
+.react-flow__node.dragging {
+  transition: none !important;
+  cursor: grabbing !important;
+}
+
+.react-flow__controls button {
+  background-color: var(--gray-75) !important;
+  border-color: var(--gray-200) !important;
+  color: var(--foreground) !important;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease !important;
+}
+
+.react-flow__controls button:hover {
+  background-color: var(--gray-100) !important;
+}
+
+.react-flow__minimap {
+  border-radius: 12px !important;
+  border: 1px solid var(--gray-200) !important;
+  overflow: hidden;
+}
+
+.react-flow__minimap-mask {
+  fill: var(--gray-200) !important;
+  opacity: 0.5;
 }

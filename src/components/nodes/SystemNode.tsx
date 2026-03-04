@@ -1,9 +1,9 @@
 "use client";
 
-import { Box, TextField, Typography } from "@mui/material";
+import { Box, InputBase } from "@mui/material";
 import { NodeResizer } from "@reactflow/node-resizer";
 import "@reactflow/node-resizer/dist/style.css";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Handle, Position, useStore } from "reactflow";
 
 interface SystemNodeProps {
@@ -17,22 +17,29 @@ interface SystemNodeProps {
   };
 }
 
-const colors = {
-  api: "#1976d2",
-  db: "#2e7d32",
-  cache: "#ed6c02",
-  queue: "#9c27b0",
+const typeAccent: Record<string, string> = {
+  api: "#3b82f6", // blue
+  db: "#22c55e", // green
+  cache: "#f97316", // orange
+  queue: "#a855f7", // purple
 };
 
-export const DEFAULT_NODE_WIDTH = 80;
-export const DEFAULT_NODE_HEIGHT = 30;
+const typeLabel: Record<string, string> = {
+  api: "API",
+  db: "DB",
+  cache: "Cache",
+  queue: "Queue",
+};
+
+export const DEFAULT_NODE_WIDTH = 100;
+export const DEFAULT_NODE_HEIGHT = 40;
 
 export default function SystemNode({ id, data, selected = false }: SystemNodeProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [label, setLabel] = useState(data.label);
   const isReadOnly = Boolean(data.readOnly);
+  const accent = typeAccent[data.type] ?? "#3b82f6";
 
-  // Subscribe to edges that touch this node and build a set of connected handle ids
   const connectedHandles = useStore(
     useCallback(
       (store) => {
@@ -47,12 +54,15 @@ export default function SystemNode({ id, data, selected = false }: SystemNodePro
     ),
   );
 
-  const baseStyle = { width: 5.5, height: 5.5, backgroundColor: "gray" };
+  const showHandle = (handleId: string) => selected || connectedHandles.has(handleId);
 
-  const getHandleStyle = (handleId: string) => ({
-    ...baseStyle,
-    opacity: selected || connectedHandles.has(handleId) ? 1 : 0,
-    transition: "opacity 0.15s ease",
+  const handleStyle = (handleId: string) => ({
+    width: 7,
+    height: 7,
+    background: accent,
+    border: "1.5px solid white",
+    opacity: showHandle(handleId) ? 1 : 0,
+    transition: "opacity 0.12s ease",
   });
 
   useEffect(() => {
@@ -60,7 +70,7 @@ export default function SystemNode({ id, data, selected = false }: SystemNodePro
   }, [data.label]);
 
   const handleSave = () => {
-    data.onLabelChange?.(id, label);
+    data.onLabelChange?.(id, label.trim() || data.label);
     setIsEditing(false);
   };
 
@@ -70,16 +80,22 @@ export default function SystemNode({ id, data, selected = false }: SystemNodePro
       sx={{
         width: "100%",
         height: "100%",
+        minWidth: DEFAULT_NODE_WIDTH,
+        minHeight: DEFAULT_NODE_HEIGHT,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: 1,
-        borderRadius: 2,
-        backgroundColor: colors[data.type],
-        color: "white",
         boxSizing: "border-box",
-        minWidth: DEFAULT_NODE_WIDTH,
-        minHeight: DEFAULT_NODE_HEIGHT,
+        position: "relative",
+        // Card-style: white/dark bg, border, accent left stripe
+        bgcolor: "background.paper",
+        border: "1.5px solid",
+        borderColor: selected ? accent : "divider",
+        borderRadius: "8px",
+        borderLeft: `3px solid ${accent}`,
+        boxShadow: selected ? `0 0 0 2px ${accent}33, 0 4px 16px ${accent}22` : "0 1px 4px rgba(0,0,0,0.07)",
+        cursor: isReadOnly ? "default" : "grab",
+        overflow: "visible",
       }}
     >
       {!isReadOnly && (
@@ -87,30 +103,91 @@ export default function SystemNode({ id, data, selected = false }: SystemNodePro
           minWidth={DEFAULT_NODE_WIDTH}
           minHeight={DEFAULT_NODE_HEIGHT}
           isVisible={selected}
-          lineStyle={{ borderColor: "#1976d2" }}
-          handleStyle={{ background: "#1976d2" }}
+          lineStyle={{ borderColor: accent, borderWidth: 1, opacity: 0.6 }}
+          handleStyle={{
+            background: accent,
+            border: "none",
+            borderRadius: 2,
+            width: 6,
+            height: 6,
+            opacity: 0.8,
+          }}
         />
       )}
-      <Handle id="top" type="source" position={Position.Top} style={getHandleStyle("top")} />
-      <Handle id="bottom" type="source" position={Position.Bottom} style={getHandleStyle("bottom")} />
-      <Handle id="left" type="source" position={Position.Left} style={getHandleStyle("left")} />
-      <Handle id="right" type="source" position={Position.Right} style={getHandleStyle("right")} />
-      {isEditing && !isReadOnly ? (
-        <TextField
-          autoFocus
-          variant="standard"
-          value={label}
-          onChange={(e) => setLabel(e.target.value)}
-          onBlur={handleSave}
-          onKeyDown={(e) => e.key === "Enter" && handleSave()}
-          size="small"
-          sx={{ input: { textAlign: "center", color: "white" } }}
-          slotProps={{ input: { disableUnderline: true } }}
-          fullWidth
-        />
-      ) : (
-        <Typography variant="body2">{label}</Typography>
-      )}
+
+      <Handle id="top" type="source" position={Position.Top} style={handleStyle("top")} />
+      <Handle id="bottom" type="source" position={Position.Bottom} style={handleStyle("bottom")} />
+      <Handle id="left" type="source" position={Position.Left} style={handleStyle("left")} />
+      <Handle id="right" type="source" position={Position.Right} style={handleStyle("right")} />
+
+      <Box
+        sx={{
+          width: "100%",
+          px: "10px",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "1px",
+          overflow: "hidden",
+        }}
+      >
+        {/* Type badge */}
+        <Box
+          component="span"
+          sx={{
+            fontSize: "0.55rem",
+            fontWeight: 700,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            color: accent,
+            lineHeight: 1,
+          }}
+        >
+          {typeLabel[data.type] ?? data.type}
+        </Box>
+
+        {/* Label / edit field */}
+        {isEditing && !isReadOnly ? (
+          <InputBase
+            autoFocus
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            onBlur={handleSave}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSave();
+              if (e.key === "Escape") {
+                setLabel(data.label);
+                setIsEditing(false);
+              }
+            }}
+            inputProps={{ style: { textAlign: "center", padding: 0 } }}
+            sx={{
+              width: "100%",
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              color: "text.primary",
+              lineHeight: 1.3,
+            }}
+          />
+        ) : (
+          <Box
+            component="span"
+            sx={{
+              fontSize: "0.75rem",
+              fontWeight: 600,
+              color: "text.primary",
+              lineHeight: 1.3,
+              textAlign: "center",
+              width: "100%",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {label}
+          </Box>
+        )}
+      </Box>
     </Box>
   );
 }

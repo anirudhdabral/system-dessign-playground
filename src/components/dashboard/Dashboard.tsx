@@ -1,16 +1,21 @@
 "use client";
 
+import FullPageLoader from "@/components/common/FullPageLoader";
+import CreatePlaygroundCard from "@/components/dashboard/CreatePlaygroundCard";
+import PlaygroundsListSection from "@/components/dashboard/PlaygroundsListSection";
+import { CreatePlaygroundFormValues, GetPlaygroundsResponse } from "@/components/dashboard/types";
+import { CREATE_PLAYGROUND, GET_PLAYGROUNDS } from "@/lib/graphql/operations/dashboard";
+import { useToast } from "@/providers/ToastProvider";
 import { useMutation, useQuery } from "@apollo/client/react";
-import { Avatar, Box, Container, Grid, Stack, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import Container from "@mui/material/Container";
+import Grid from "@mui/material/Grid";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import { alpha } from "@mui/material/styles";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
-import FullPageLoader from "@/components/common/FullPageLoader";
-import CreatePlaygroundCard from "@/components/dashboard/CreatePlaygroundCard";
-import PlaygroundsListCard from "@/components/dashboard/PlaygroundsListCard";
-import { CREATE_PLAYGROUND, GET_PLAYGROUNDS } from "@/lib/graphql/operations/dashboard";
-import { CreatePlaygroundFormValues, GetPlaygroundsResponse } from "@/components/dashboard/types";
-import { useToast } from "@/providers/ToastProvider";
 import { MdDashboard } from "react-icons/md";
 
 export default function Dashboard() {
@@ -53,51 +58,90 @@ export default function Dashboard() {
   if (status === "loading") {
     return <FullPageLoader />;
   }
-  if (!session) return <Typography>Please login to access dashboard.</Typography>;
+  if (!session) {
+    return (
+      <Container sx={{ mt: 8, textAlign: "center" }}>
+        <Typography variant="h6" sx={{ color: "text.secondary" }}>
+          Please sign in to access your dashboard.
+        </Typography>
+      </Container>
+    );
+  }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 5 }}>
+    <Container maxWidth="lg" sx={{ py: 6 }}>
       <Stack
         component={motion.div}
-        spacing={4}
-        initial={{ opacity: 0, y: 12 }}
+        spacing={5}
+        initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: "easeOut" }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
       >
+        {/* Header */}
         <Box
           component={motion.div}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.05, duration: 0.3 }}
+          transition={{ delay: 0.05, duration: 0.35 }}
         >
-          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ mb: 1 }}>
-            <Avatar sx={{ width: 34, height: 34 }}>
-              <MdDashboard />
-            </Avatar>
-            <Typography variant="h4">System Design Dashboard</Typography>
+          <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 1 }}>
+            <Box
+              sx={{
+                width: 44,
+                height: 44,
+                borderRadius: "14px",
+                background: "linear-gradient(135deg, #4c6fff 0%, #7c3aed 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "white",
+                boxShadow: (t) => `0 4px 14px ${alpha(t.palette.primary.main, 0.4)}`,
+              }}
+            >
+              <MdDashboard size={22} />
+            </Box>
+            <Box>
+              <Typography variant="h4" sx={{ lineHeight: 1.2 }}>
+                My Playgrounds
+              </Typography>
+              <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.25 }}>
+                Hello{session.user?.name ? `, ${session.user.name.split(" ")[0]}` : ""}! Build and share architecture
+                diagrams.
+              </Typography>
+            </Box>
           </Stack>
-          <Typography variant="body1">Build and share architecture playgrounds with version history.</Typography>
         </Box>
 
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 12, md: 5 }}>
+        {/* Main grid */}
+        <Grid container spacing={3} alignItems="flex-start">
+          <Grid size={{ xs: 12, md: 4 }}>
             <Box
               component={motion.div}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.35 }}
+              transition={{ delay: 0.12, duration: 0.35 }}
             >
               <CreatePlaygroundCard
                 control={control}
                 handleSubmit={handleSubmit}
                 onCreate={onCreatePlayground}
                 disabled={!isCreateDirty || !isCreateValid || creatingPlayground}
+                loading={creatingPlayground}
               />
             </Box>
           </Grid>
-        </Grid>
 
-        <PlaygroundsListCard loading={loading} playgrounds={data?.playgrounds ?? []} />
+          <Grid size={{ xs: 12, md: 8 }}>
+            <Box
+              component={motion.div}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.18, duration: 0.35 }}
+            >
+              <PlaygroundsListSection loading={loading} playgrounds={data?.playgrounds ?? []} />
+            </Box>
+          </Grid>
+        </Grid>
       </Stack>
     </Container>
   );

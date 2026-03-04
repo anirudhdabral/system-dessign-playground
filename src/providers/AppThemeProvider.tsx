@@ -31,18 +31,17 @@ export default function AppThemeProvider({ children }: AppThemeProviderProps) {
   const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)", {
     noSsr: true,
   });
-  const [mode, setMode] = useState<"light" | "dark">("light");
-  const [tokens, setTokens] = useState<ThemeColorTokens>(fallbackThemeColorTokens);
 
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const storedMode = window.localStorage.getItem("app-theme-mode");
-    if (storedMode === "light" || storedMode === "dark") {
-      setMode(storedMode);
-      return;
-    }
-    setMode(prefersDarkMode ? "dark" : "light");
-  }, [prefersDarkMode]);
+  // Lazy initialiser: read localStorage synchronously on first client render.
+  // This means the very first React render already uses the correct palette,
+  // eliminating the single-frame MUI "light flash" before the useEffect fired.
+  const [mode, setMode] = useState<"light" | "dark">(() => {
+    if (typeof window === "undefined") return "light";
+    const stored = window.localStorage.getItem("app-theme-mode");
+    if (stored === "light" || stored === "dark") return stored;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
+  const [tokens, setTokens] = useState<ThemeColorTokens>(fallbackThemeColorTokens);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -79,14 +78,20 @@ export default function AppThemeProvider({ children }: AppThemeProviderProps) {
 
   useLayoutEffect(() => {
     if (typeof window === "undefined" || typeof document === "undefined") return;
+
+    const html = document.documentElement;
+
+    // Suppress all CSS transitions for the duration of this paint so the
+    // entire palette swaps in a single frame with no colour flash.
+    html.classList.add("theme-switching");
+    html.setAttribute("data-theme", mode);
     window.localStorage.setItem("app-theme-mode", mode);
-    document.documentElement.setAttribute("data-theme", mode);
 
     let raf1 = 0;
     let raf2 = 0;
     raf1 = window.requestAnimationFrame(() => {
       raf2 = window.requestAnimationFrame(() => {
-        const rootStyles = getComputedStyle(document.documentElement);
+        const rootStyles = getComputedStyle(html);
         const read = (name: string, fallback: string) => rootStyles.getPropertyValue(name).trim() || fallback;
 
         setTokens({
@@ -114,6 +119,12 @@ export default function AppThemeProvider({ children }: AppThemeProviderProps) {
           gray200: read("--gray-200", fallbackThemeColorTokens.gray200),
           gray300: read("--gray-300", fallbackThemeColorTokens.gray300),
           gray700: read("--gray-700", fallbackThemeColorTokens.gray700),
+        });
+
+        // Re-enable transitions after the palette has settled.
+        // We need one more frame so React has committed the new MUI theme too.
+        window.requestAnimationFrame(() => {
+          html.classList.remove("theme-switching");
         });
       });
     });

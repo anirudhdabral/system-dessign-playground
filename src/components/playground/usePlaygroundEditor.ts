@@ -49,6 +49,10 @@ export function usePlaygroundEditor(id: string) {
   const canvasContainerRef = useRef<HTMLDivElement | null>(null);
   const nodesRef = useRef<Node[]>([]);
   const edgesRef = useRef<Edge[]>([]);
+  /** True while the user is actively dragging a node — suppresses markDiagramDirty */
+  const isDraggingRef = useRef(false);
+  /** True while a text input/textarea has focus — suppresses autosave */
+  const isInputFocusedRef = useRef(false);
 
   const { data, loading } = useQuery<GetPlaygroundResponse>(GET_PLAYGROUND, {
     variables: { id },
@@ -295,7 +299,15 @@ export function usePlaygroundEditor(id: string) {
     nodesRef.current = nextNodes;
     setNodes(nextNodes);
     if (isHydratingRef.current) return;
-    if (changes.some((change) => change.type !== "select")) {
+    // Skip markDiagramDirty for mid-drag position events — it fires many times
+    // per frame and triggers expensive RHF state updates causing jank.
+    // onNodeDragStop handles marking dirty once the drag is complete.
+    const hasMeaningfulChange = changes.some((c) => {
+      if (c.type === "select") return false;
+      if (c.type === "position" && isDraggingRef.current) return false;
+      return true;
+    });
+    if (hasMeaningfulChange) {
       markDiagramDirty(nextNodes, edgesRef.current);
     }
   };
@@ -602,6 +614,39 @@ export function usePlaygroundEditor(id: string) {
     showToast("Edge updated", "success");
   };
 
+  // Track input focus globally so autosave is paused while typing
+  useEffect(() => {
+    const onFocusIn = (e: FocusEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement || t?.isContentEditable) {
+        isInputFocusedRef.current = true;
+      }
+    };
+    const onFocusOut = (e: FocusEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement || t?.isContentEditable) {
+        isInputFocusedRef.current = false;
+      }
+    };
+    document.addEventListener("focusin", onFocusIn);
+    document.addEventListener("focusout", onFocusOut);
+    return () => {
+      document.removeEventListener("focusin", onFocusIn);
+      document.removeEventListener("focusout", onFocusOut);
+    };
+  }, []);
+
+  // Drag lifecycle — pause autosave while dragging, mark dirty on release
+  const onNodeDragStart = () => {
+    isDraggingRef.current = true;
+  };
+
+  const onNodeDragStop = () => {
+    isDraggingRef.current = false;
+    // Now that the drag is done, persist the final positions
+    markDiagramDirty();
+  };
+
   useEffect(() => {
     if (previewVersion || autosavePaused) return;
 
@@ -609,6 +654,8 @@ export function usePlaygroundEditor(id: string) {
       if (isHydratingRef.current) return;
       if (!isFormDirty) return;
       if (updatingPlayground) return;
+      // Skip autosave while dragging nodes or typing in an input
+      if (isDraggingRef.current || isInputFocusedRef.current) return;
 
       try {
         await persistPlayground(false, "Autosaved", false);
@@ -656,6 +703,8 @@ export function usePlaygroundEditor(id: string) {
     onDragOver,
     onConnectWithDirty,
     onEdgeDoubleClick,
+    onNodeDragStart,
+    onNodeDragStop,
     handleNodesChangeWithDirty,
     handleEdgesChangeWithDirty,
     onCloseEdgeDialog,

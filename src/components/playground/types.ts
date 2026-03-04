@@ -70,4 +70,8 @@ export interface PlaygroundCanvasProps {
   onConnect: (params: Connection) => void;
   onDrop: (event: DragEvent) => void;
   onDragOver: (event: DragEvent) => void;
+  /** Called when the user starts dragging a node — used to pause autosave */
+  onNodeDragStart?: () => void;
+  /** Called when the user releases a node — used to resume autosave & mark dirty */
+  onNodeDragStop?: () => void;
 }

@@ -1,0 +1,1 @@
+﻿.next/dev/types/validator.ts(99,31): error TS2344: Type 'typeof import("C:/Code/system-design-playground/src/app/api/graphql/route")' does not satisfy the constraint 'RouteHandlerConfig<"/api/graphql">'.
