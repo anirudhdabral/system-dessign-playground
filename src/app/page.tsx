@@ -77,7 +77,7 @@ export default function Home() {
           {/* Badge */}
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
             <Chip
-              label="✦ Visual System Design Tool"
+              label="* Visual System Design Tool"
               sx={{
                 fontWeight: 600,
                 fontSize: "0.78rem",
@@ -105,10 +105,8 @@ export default function Home() {
                 fontSize: { xs: "2.4rem", sm: "3.2rem", md: "4rem" },
                 lineHeight: 1.1,
                 letterSpacing: "-1.5px",
-                background: (t) =>
-                  t.palette.mode === "dark"
-                    ? "linear-gradient(130deg, #e2e8f0 20%, #94a3b8 80%)"
-                    : "linear-gradient(130deg, #0f172a 20%, #334155 80%)",
+                background:
+                  "linear-gradient(130deg, var(--home-hero-title-gradient-start) 20%, var(--home-hero-title-gradient-end) 80%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
@@ -137,8 +135,15 @@ export default function Home() {
             transition={{ duration: 0.4, delay: 0.16 }}
             style={{ textAlign: "center", maxWidth: 520 }}
           >
-            <Typography variant="body1" sx={{ color: "text.secondary", fontSize: "1.05rem", lineHeight: 1.8 }}>
-              A collaborative canvas for sketching scalable architectures — with versioning, sharing, and a rich node
+            <Typography
+              variant="body1"
+              sx={{
+                color: (t) => (t.palette.mode === "dark" ? alpha(t.palette.text.primary, 0.88) : "text.secondary"),
+                fontSize: "1.05rem",
+                lineHeight: 1.8,
+              }}
+            >
+              A collaborative canvas for sketching scalable architectures - with versioning, sharing, and a rich node
               palette built in.
             </Typography>
           </motion.div>
@@ -220,8 +225,9 @@ export default function Home() {
                   p: 2.5,
                   borderRadius: 3,
                   border: "1px solid",
-                  borderColor: "divider",
-                  bgcolor: "background.paper",
+                  borderColor: (t) => (t.palette.mode === "dark" ? alpha(t.palette.common.white, 0.18) : "divider"),
+                  bgcolor: (t) =>
+                    t.palette.mode === "dark" ? alpha(t.palette.background.paper, 0.78) : t.palette.background.paper,
                   display: "flex",
                   flexDirection: "column",
                   gap: 1,
@@ -250,7 +256,13 @@ export default function Home() {
                 <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
                   {f.title}
                 </Typography>
-                <Typography variant="caption" sx={{ color: "text.secondary", lineHeight: 1.7 }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: (t) => (t.palette.mode === "dark" ? alpha(t.palette.text.primary, 0.82) : "text.secondary"),
+                    lineHeight: 1.7,
+                  }}
+                >
                   {f.desc}
                 </Typography>
               </Box>
@@ -261,3 +273,4 @@ export default function Home() {
     </Box>
   );
 }
+

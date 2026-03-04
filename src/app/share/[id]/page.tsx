@@ -1,14 +1,25 @@
 "use client";
 
-import SystemNode from "@/components/nodes/SystemNode";
 import GroupNode from "@/components/nodes/GroupNode";
+import SystemNode from "@/components/nodes/SystemNode";
+import { nodeColors } from "@/components/playground/constants";
 import { GET_SHARED_PLAYGROUND } from "@/lib/graphql/operations/playground";
 import { useQuery } from "@apollo/client/react";
 import { Box, CircularProgress, Container, Typography } from "@mui/material";
 import { motion } from "framer-motion";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
-import ReactFlow, { Background, ConnectionMode, Edge, MiniMap, Node, useEdgesState, useNodesState } from "reactflow";
+import ReactFlow, {
+  Background,
+  BackgroundVariant,
+  ConnectionMode,
+  Controls,
+  Edge,
+  MiniMap,
+  Node,
+  useEdgesState,
+  useNodesState,
+} from "reactflow";
 import "reactflow/dist/style.css";
 
 interface SharedPlayground {
@@ -98,7 +109,7 @@ export default function SharedPlaygroundPage() {
 
       <Box
         component={motion.div}
-        sx={{ height: 650, border: "1px solid #ccc" }}
+        sx={{ height: 650, border: "1px solid #ccc", mb: 5, borderRadius: 3 }}
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.06, duration: 0.3 }}
@@ -119,17 +130,19 @@ export default function SharedPlaygroundPage() {
           zoomOnDoubleClick={false}
           fitView
         >
-          <Background />
-          <MiniMap
-            nodeColor={(node) => {
-              const colors: Record<string, string> = {
-                api: "#1976d2",
-                db: "#2e7d32",
-                cache: "#ed6c02",
-                queue: "#9c27b0",
-              };
-              return colors[node.data?.type as string] || "#999";
+          <Controls
+            showInteractive={false}
+            style={{
+              borderRadius: 12,
+              overflow: "hidden",
+              border: "1px solid var(--gray-200)",
             }}
+          />
+          <Background variant={BackgroundVariant.Dots} gap={24} size={1.5} color="var(--gray-400)" />
+          <MiniMap
+            nodeColor={(node) => nodeColors[node.data.type as string] || "#999"}
+            style={{ borderRadius: 12, overflow: "hidden" }}
+            maskColor="rgba(0,0,0,0.06)"
           />
         </ReactFlow>
       </Box>

@@ -52,6 +52,8 @@
   --gray-700: #4a5568;
   --gray-800: #2d3748;
   --gray-900: #1a202c;
+  --home-hero-title-gradient-start: #0f172a;
+  --home-hero-title-gradient-end: #334155;
 
   /* Transition timing */
   --theme-transition:
@@ -80,6 +82,9 @@
     --gray-200: hsl(220 24% 24%);
     --gray-300: hsl(218 18% 34%);
     --gray-400: hsl(215 16% 48%);
+    --gray-700: hsl(214 18% 72%);
+    --home-hero-title-gradient-start: #f8fafc;
+    --home-hero-title-gradient-end: #cbd5e1;
   }
 }
 
@@ -100,6 +105,8 @@ html[data-theme="light"] {
   --gray-200: #edf2f7;
   --gray-300: #e2e8f0;
   --gray-400: #cbd5e0;
+  --home-hero-title-gradient-start: #0f172a;
+  --home-hero-title-gradient-end: #334155;
 }
 
 html[data-theme="dark"] {
@@ -119,6 +126,9 @@ html[data-theme="dark"] {
   --gray-200: hsl(220 24% 24%);
   --gray-300: hsl(218 18% 34%);
   --gray-400: hsl(215 16% 48%);
+  --gray-700: hsl(214 18% 72%);
+  --home-hero-title-gradient-start: #f8fafc;
+  --home-hero-title-gradient-end: #cbd5e1;
 }
 
 html,
@@ -250,4 +260,46 @@ a {
 .react-flow__minimap-mask {
   fill: var(--gray-200) !important;
   opacity: 0.5;
+}
+
+.mobile-blocked-screen {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .desktop-app {
+    display: none;
+  }
+
+  .mobile-blocked-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .mobile-blocked-screen__card {
+    max-width: 420px;
+    width: 100%;
+    padding: 28px 24px;
+    border-radius: 16px;
+    border: 1px solid var(--gray-200);
+    background: color-mix(in srgb, var(--gray-75) 85%, transparent);
+    text-align: center;
+  }
+
+  .mobile-blocked-screen__title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--foreground);
+  }
+
+  .mobile-blocked-screen__text {
+    margin-top: 10px;
+    font-size: 0.98rem;
+    line-height: 1.6;
+    color: var(--gray-700);
+  }
 }

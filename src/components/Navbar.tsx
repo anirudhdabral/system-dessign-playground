@@ -7,7 +7,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { MdDarkMode, MdDashboard, MdHome, MdLightMode, MdLogin, MdLogout } from "react-icons/md";
+import { MdDarkMode, MdDashboard, MdLightMode, MdLogin, MdLogout } from "react-icons/md";
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -76,21 +76,6 @@ export default function Navbar() {
 
         {/* Nav links */}
         <Box sx={{ display: "flex", gap: 0.5, alignItems: "center" }}>
-          <Button
-            color="inherit"
-            component={Link}
-            href="/"
-            startIcon={<MdHome size={16} />}
-            size="small"
-            sx={{
-              fontWeight: 500,
-              color: "text.secondary",
-              "&:hover": { color: "text.primary", bgcolor: (t) => alpha(t.palette.text.primary, 0.06) },
-            }}
-          >
-            Home
-          </Button>
-
           {session && (
             <Button
               color="inherit"
@@ -110,15 +95,37 @@ export default function Navbar() {
 
           {/* Auth */}
           {!session ? (
-            <Button
-              variant="contained"
-              size="small"
-              onClick={() => signIn()}
-              startIcon={<MdLogin size={15} />}
-              sx={{ ml: 0.5, borderRadius: "10px" }}
-            >
-              Sign In
-            </Button>
+            <>
+              <IconButton
+                size="small"
+                onClick={toggleTheme}
+                aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+                sx={{
+                  ml: 0.5,
+                  width: 32,
+                  height: 32,
+                  border: "1px solid",
+                  borderColor: "divider",
+                  color: isDark ? "primary.light" : "warning.dark",
+                  bgcolor: (t) => alpha(t.palette.text.primary, 0.04),
+                  "&:hover": {
+                    bgcolor: (t) => alpha(t.palette.text.primary, 0.1),
+                    borderColor: "text.secondary",
+                  },
+                }}
+              >
+                {isDark ? <MdDarkMode size={16} /> : <MdLightMode size={16} />}
+              </IconButton>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={() => signIn()}
+                startIcon={<MdLogin size={15} />}
+                sx={{ ml: 0.5, borderRadius: "10px" }}
+              >
+                Sign In
+              </Button>
+            </>
           ) : (
             <>
               {/* Clickable avatar */}

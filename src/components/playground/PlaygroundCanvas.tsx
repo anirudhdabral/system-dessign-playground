@@ -3,18 +3,8 @@
 import { Box } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import ReactFlow, { Background, BackgroundVariant, ConnectionMode, Controls, MiniMap } from "reactflow";
+import { nodeColors } from "./constants";
 import { PlaygroundCanvasProps } from "./types";
-
-const nodeColors: Record<string, string> = {
-  api: "#3b82f6",
-  db: "#22c55e",
-  cache: "#f97316",
-  queue: "#a855f7",
-  vpc: "#334155",
-  "availability-zone": "#475569",
-  "kubernetes-cluster": "#0f766e",
-  custom: "#64748b",
-};
 
 export default function PlaygroundCanvas({
   containerRef,
@@ -109,13 +99,13 @@ export default function PlaygroundCanvas({
         proOptions={{ hideAttribution: false }}
       >
         <Controls
+          showInteractive={false}
           style={{
             borderRadius: 12,
             overflow: "hidden",
             border: "1px solid var(--gray-200)",
           }}
         />
-        {/* Dots grid — use a slightly stronger color so it's visible in both modes */}
         <Background variant={BackgroundVariant.Dots} gap={24} size={1.5} color="var(--gray-400)" />
         <MiniMap
           nodeColor={(node) => nodeColors[node.data.type as string] || "#999"}

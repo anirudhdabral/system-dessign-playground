@@ -1,6 +1,7 @@
 "use client";
 
 import "./globals.css";
+import AuthRouteGuard from "@/components/AuthRouteGuard";
 import { apolloClient } from "@/lib/apolloClient";
 import AppThemeProvider from "@/providers/AppThemeProvider";
 import ToastProvider from "@/providers/ToastProvider";
@@ -71,10 +72,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <ApolloProvider client={apolloClient}>
                 <AppThemeProvider>
                   <ToastProvider>
-                    <Navbar />
-                    {children}
-                  </ToastProvider>
-                </AppThemeProvider>
+                  <Navbar />
+                  <AuthRouteGuard>{children}</AuthRouteGuard>
+                </ToastProvider>
+              </AppThemeProvider>
               </ApolloProvider>
             </ReactFlowProvider>
           </SessionProvider>
