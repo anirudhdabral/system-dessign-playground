@@ -8,7 +8,7 @@ import { Box, CircularProgress, Container, Typography } from "@mui/material";
 import { motion } from "framer-motion";
 import { useParams } from "next/navigation";
 import { useEffect } from "react";
-import ReactFlow, { Background, Edge, MiniMap, Node, useEdgesState, useNodesState } from "reactflow";
+import ReactFlow, { Background, ConnectionMode, Edge, MiniMap, Node, useEdgesState, useNodesState } from "reactflow";
 import "reactflow/dist/style.css";
 
 interface SharedPlayground {
@@ -25,6 +25,8 @@ interface SharedPlayground {
 interface GetSharedPlaygroundResponse {
   sharedPlayground: SharedPlayground;
 }
+
+const DEFAULT_EDGE_STYLE = { stroke: "#b1b1b7", strokeWidth: 1 };
 
 const nodeTypes = {
   systemNode: SystemNode,
@@ -54,7 +56,12 @@ export default function SharedPlaygroundPage() {
     }));
 
     setNodes(loadedNodes);
-    setEdges(data.sharedPlayground.diagram.edges || []);
+    setEdges(
+      (data.sharedPlayground.diagram.edges || []).map((edge: Edge) => ({
+        ...edge,
+        style: { ...DEFAULT_EDGE_STYLE, ...edge.style },
+      })),
+    );
   }, [data, setEdges, setNodes]);
 
   if (loading) {
@@ -102,6 +109,7 @@ export default function SharedPlaygroundPage() {
           nodeTypes={nodeTypes}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
+          connectionMode={ConnectionMode.Loose}
           nodesDraggable={false}
           nodesConnectable={false}
           elementsSelectable={false}
