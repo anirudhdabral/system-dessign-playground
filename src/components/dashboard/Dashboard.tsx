@@ -19,6 +19,7 @@ import { useForm } from "react-hook-form";
 import { MdDashboard } from "react-icons/md";
 
 export default function Dashboard() {
+  const maxPlaygrounds = 4;
   const { data: session, status } = useSession();
   const { showToast } = useToast();
   const { data, loading } = useQuery<GetPlaygroundsResponse>(GET_PLAYGROUNDS);
@@ -50,10 +51,18 @@ export default function Dashboard() {
       });
       reset();
       showToast("Playground created successfully", "success");
-    } catch {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to create playground";
+      if (message.includes("Playground limit reached")) {
+        showToast(`You can create up to ${maxPlaygrounds} playgrounds.`, "warning");
+        return;
+      }
       showToast("Failed to create playground", "error");
     }
   };
+
+  const playgroundCount = data?.playgrounds?.length ?? 0;
+  const hasReachedPlaygroundLimit = playgroundCount >= maxPlaygrounds;
 
   if (status === "loading") {
     return <FullPageLoader />;
@@ -125,8 +134,13 @@ export default function Dashboard() {
                 control={control}
                 handleSubmit={handleSubmit}
                 onCreate={onCreatePlayground}
-                disabled={!isCreateDirty || !isCreateValid || creatingPlayground}
+                disabled={!isCreateDirty || !isCreateValid || creatingPlayground || hasReachedPlaygroundLimit}
                 loading={creatingPlayground}
+                helperText={
+                  hasReachedPlaygroundLimit
+                    ? `You have reached the limit of ${maxPlaygrounds} playgrounds. Delete one to create a new playground.`
+                    : undefined
+                }
               />
             </Box>
           </Grid>

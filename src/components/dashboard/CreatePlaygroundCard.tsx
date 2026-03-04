@@ -20,6 +20,7 @@ interface CreatePlaygroundCardProps {
   onCreate: (values: CreatePlaygroundFormValues) => Promise<void>;
   disabled: boolean;
   loading?: boolean;
+  helperText?: string;
 }
 
 export default function CreatePlaygroundCard({
@@ -28,6 +29,7 @@ export default function CreatePlaygroundCard({
   onCreate,
   disabled,
   loading,
+  helperText,
 }: CreatePlaygroundCardProps) {
   return (
     <motion.div
@@ -35,11 +37,9 @@ export default function CreatePlaygroundCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: "easeOut" }}
       whileHover={{ y: -3 }}
-      // whileHover uses spring by default — feels smooth and physical
       style={{ borderRadius: 16 }}
     >
       <Paper sx={{ overflow: "hidden" }}>
-        {/* Gradient top accent */}
         <Box
           sx={{
             height: 4,
@@ -103,7 +103,7 @@ export default function CreatePlaygroundCard({
                   size="small"
                   multiline
                   rows={3}
-                  placeholder="Briefly describe what you're designing…"
+                  placeholder="Briefly describe what you're designing..."
                 />
               )}
             />
@@ -124,8 +124,14 @@ export default function CreatePlaygroundCard({
                 },
               }}
             >
-              {loading ? "Creating…" : "Create Playground"}
+              {loading ? "Creating..." : "Create Playground"}
             </Button>
+
+            {helperText && (
+              <Typography variant="caption" sx={{ color: "warning.main", textAlign: "center", display: "block" }}>
+                {helperText}
+              </Typography>
+            )}
           </Stack>
         </Box>
       </Paper>

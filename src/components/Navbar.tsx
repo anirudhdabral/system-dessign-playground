@@ -6,13 +6,16 @@ import { alpha } from "@mui/material/styles";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { MdDarkMode, MdDashboard, MdLightMode, MdLogin, MdLogout } from "react-icons/md";
 
 export default function Navbar() {
   const { data: session } = useSession();
+  const pathname = usePathname();
   const { mode, toggleTheme } = useThemeMode();
   const isDark = mode === "dark";
+  const isDashboardActive = pathname === "/dashboard";
 
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
   const popoverOpen = Boolean(anchorEl);
@@ -85,8 +88,15 @@ export default function Navbar() {
               size="small"
               sx={{
                 fontWeight: 500,
-                color: "text.secondary",
-                "&:hover": { color: "text.primary", bgcolor: (t) => alpha(t.palette.text.primary, 0.06) },
+                color: isDashboardActive ? "primary.main" : "text.secondary",
+                bgcolor: (t) => (isDashboardActive ? alpha(t.palette.primary.main, 0.12) : "transparent"),
+                border: "1px solid",
+                borderColor: (t) => (isDashboardActive ? alpha(t.palette.primary.main, 0.25) : "transparent"),
+                "&:hover": {
+                  color: isDashboardActive ? "primary.main" : "text.primary",
+                  bgcolor: (t) =>
+                    isDashboardActive ? alpha(t.palette.primary.main, 0.16) : alpha(t.palette.text.primary, 0.06),
+                },
               }}
             >
               Dashboard

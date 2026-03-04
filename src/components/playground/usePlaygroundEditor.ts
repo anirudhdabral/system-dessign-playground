@@ -535,7 +535,12 @@ export function usePlaygroundEditor(id: string) {
       const nextPublic = !data.playground.isPublic;
       await togglePublic({ variables: { id, isPublic: nextPublic } });
       showToast(nextPublic ? "Playground is now public" : "Playground is now private", "success");
-    } catch {
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to update visibility";
+      if (message.includes("Public playground limit reached")) {
+        showToast("You can have only 1 public playground at a time.", "warning");
+        return;
+      }
       showToast("Failed to update visibility", "error");
     }
   };

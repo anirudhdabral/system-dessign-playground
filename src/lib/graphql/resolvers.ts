@@ -1,7 +1,6 @@
 import { connectDB } from "@/lib/mongodb";
 import { Diagram, Playground } from "@/models/Playground";
 import GraphQLJSON from "graphql-type-json";
-import { Types } from "mongoose";
 
 type ResolverContext = {
   session?: {
@@ -37,6 +36,8 @@ type DeletePlaygroundArgs = {
 };
 
 const cloneDiagram = (diagram: Diagram): Diagram => JSON.parse(JSON.stringify(diagram)) as Diagram;
+const MAX_PLAYGROUNDS_PER_USER = 4;
+const MAX_PUBLIC_PLAYGROUNDS_PER_USER = 1;
 
 const ensurePublicField = () => {
   if (!Playground.schema.path("isPublic")) {
@@ -167,11 +168,16 @@ export const resolvers = {
       }
 
       await connectDB();
+      const userId = context.session.user.email;
+      const playgroundCount = await Playground.countDocuments({ userId });
+      if (playgroundCount >= MAX_PLAYGROUNDS_PER_USER) {
+        throw new Error(`Playground limit reached. You can create up to ${MAX_PLAYGROUNDS_PER_USER} playgrounds.`);
+      }
 
       const playground = await Playground.create({
         title: args.title,
         description: args.description,
-        userId: context.session.user.email,
+        userId,
         isPublic: false,
       });
 
@@ -219,29 +225,34 @@ export const resolvers = {
       }
 
       await connectDB();
+      const userId = context.session.user.email;
+      const existing = await Playground.findOne({
+        _id: args.id,
+        userId,
+      });
 
-      const objectId = new Types.ObjectId(args.id);
-      const result = await Playground.collection.findOneAndUpdate(
-        {
-          _id: objectId,
-          userId: context.session.user.email,
-        },
-        {
-          $set: { isPublic: args.isPublic },
-        },
-        {
-          returnDocument: "after",
-        },
-      );
-
-      if (!result) {
+      if (!existing) {
         throw new Error("Playground not found");
       }
 
+      if (args.isPublic && !existing.isPublic) {
+        const currentPublicCount = await Playground.countDocuments({
+          userId,
+          isPublic: true,
+          _id: { $ne: existing._id },
+        });
+        if (currentPublicCount >= MAX_PUBLIC_PLAYGROUNDS_PER_USER) {
+          throw new Error(`Public playground limit reached. You can have only ${MAX_PUBLIC_PLAYGROUNDS_PER_USER} public playground at a time.`);
+        }
+      }
+
+      existing.isPublic = args.isPublic;
+      await existing.save();
+
       return {
-        ...result,
-        id: result._id.toString(),
-        isPublic: Boolean(result.isPublic),
+        ...existing.toObject(),
+        id: existing._id.toString(),
+        isPublic: Boolean(existing.isPublic),
       };
     },
     deletePlayground: async (_: unknown, args: DeletePlaygroundArgs, context: ResolverContext) => {
