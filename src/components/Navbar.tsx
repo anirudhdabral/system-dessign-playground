@@ -1,7 +1,19 @@
 "use client";
 
 import { useThemeMode } from "@/providers/AppThemeProvider";
-import { AppBar, Avatar, Box, Button, Chip, Divider, IconButton, Popover, Toolbar, Typography } from "@mui/material";
+import {
+  AppBar,
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  Divider,
+  IconButton,
+  Popover,
+  Toolbar,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { signIn, signOut, useSession } from "next-auth/react";
 import Image from "next/image";
@@ -212,14 +224,16 @@ export default function Navbar() {
                       {session.user?.name ?? "User"}
                     </Typography>
                     {session.user?.email && (
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        noWrap
-                        sx={{ display: "block", maxWidth: 140 }}
-                      >
-                        {session.user.email}
-                      </Typography>
+                      <Tooltip title={session.user.email}>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          noWrap
+                          sx={{ display: "block", maxWidth: 140 }}
+                        >
+                          {session.user.email}
+                        </Typography>
+                      </Tooltip>
                     )}
                   </Box>
                 </Box>
